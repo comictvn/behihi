@@ -45,6 +45,34 @@ module Api
       render json: { message: I18n.t('common.errors.record_not_uniq_error') }, status: :forbidden
     end
 
+    def record_user_answer
+      user_id = params[:user_id].to_i
+      question_id = params[:question_id].to_i
+      selected_option = params[:selected_option]
+
+      return render json: { message: "Invalid input format." }, status: :unprocessable_entity unless user_id.is_a?(Integer) && question_id.is_a?(Integer) && selected_option.is_a?(String)
+
+      user = User.find_by(id: user_id)
+      return render json: { message: "User not found." }, status: :not_found unless user
+
+      question = Question.find_by(id: question_id)
+      return render json: { message: "Question not found." }, status: :not_found unless question
+
+      options = question.options.pluck(:content)
+      return render json: { message: "Invalid option selected." }, status: :unprocessable_entity unless options.include?(selected_option)
+
+      begin
+        AnswerService::RecordAnswer.new(
+          user_id: user_id,
+          question_id: question_id,
+          selected_option: selected_option
+        ).execute
+        render json: { status: 200, message: "Your answer has been recorded successfully." }, status: :ok
+      rescue StandardError => e
+        render json: { message: e.message }, status: :unprocessable_entity
+      end
+    end
+
     def custom_token_initialize_values(resource, client)
       token = CustomAccessToken.create(
         application_id: client.id,
