@@ -1,33 +1,35 @@
 
-class AnswerService::RecordAnswer
-  def initialize(user_id, question_id, selected_option_id)
+class AnswerService::RecordAnswer < BaseService
+  attr_reader :user_id, :question_id, :selected_option
+
+  def initialize(user_id, question_id, selected_option)
     @user_id = user_id
     @question_id = question_id
-    @selected_option_id = selected_option_id
+    @selected_option = selected_option
   end
 
-  def call
+  def execute
     ActiveRecord::Base.transaction do
-      user = User.find_by(id: @user_id)
-      raise 'User not found' unless user
+      user = User.find_by(id: user_id)
+      raise StandardError, 'User not found' unless user
 
-      question = Question.find_by(id: @question_id)
-      raise 'Question not found' unless question
+      question = Question.find_by(id: question_id)
+      raise StandardError, 'Question not found' unless question
 
-      option = Option.find_by(id: @selected_option_id, question_id: @question_id)
-      raise 'Option not found or does not belong to the question' unless option
+      option = Option.find_by(id: selected_option, question_id: question_id)
+      raise StandardError, 'Option not found or does not belong to the question' unless option
 
-      answer = Answer.find_or_initialize_by(user_id: @user_id, question_id: @question_id)
-      answer.selected_option = option.content
+      answer = Answer.find_or_initialize_by(user_id: user_id, question_id: question_id)
+      answer.selected_option = selected_option
       answer.submitted_at = Time.current
 
       if answer.save
-        'Answer recorded or updated successfully'
+        { message: answer.persisted? ? 'Answer updated successfully' : 'Answer recorded successfully' }
       else
-        raise 'Failed to record or update the answer'
+        raise StandardError, 'Failed to save answer'
       end
     end
-  rescue => e
-    e.message
+  rescue StandardError => e
+    { error: e.message }
   end
 end
