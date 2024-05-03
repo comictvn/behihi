@@ -45,6 +45,29 @@ module Api
       render json: { message: I18n.t('common.errors.record_not_uniq_error') }, status: :forbidden
     end
 
+    def authenticate_and_validate_test_progress_update
+      doorkeeper_authorize!
+
+      user_id = params[:user_id].to_i
+      question_id = params[:question_id].to_i
+
+      unless user_id.is_a?(Integer) && question_id.is_a?(Integer)
+        return render json: error_response(nil, StandardError.new("Invalid input format.")), status: :unprocessable_entity
+      end
+
+      user = User.find_by(id: user_id)
+      unless user
+        return render json: error_response(nil, StandardError.new("User not found.")), status: :not_found
+      end
+
+      question = Question.find_by(id: question_id)
+      unless question
+        return render json: error_response(nil, StandardError.new("Question not found.")), status: :not_found
+      end
+
+      return user, user_id, question_id
+    end
+
     def custom_token_initialize_values(resource, client)
       token = CustomAccessToken.create(
         application_id: client.id,
