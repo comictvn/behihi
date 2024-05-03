@@ -1,31 +1,33 @@
 
 class QuestionNavigationService
-  include BaseService
-
-  def initialize(user_id, question_id)
-    @user_id = user_id
-    @question_id = question_id
-  end
-
-  def validate_navigation
-    begin
-      user_exists = User.exists?(@user_id)
-      question_exists = Question.exists?(@question_id)
-
-      unless user_exists && question_exists
-        return { error: "User or question does not exist." }
+  def navigate_next_question(user_id:, question_id:, selected_option:)
+    ActiveRecord::Base.transaction do
+      user = User.find(user_id)
+      question = Question.find(question_id)
+      
+      if selected_option.present?
+        option = question.options.find_by!(content: selected_option)
+        Answer.create!(
+          user: user,
+          question: question,
+          selected_option: option.content,
+          is_correct: option.is_correct
+        )
       end
-
-      answer_exists = Answer.exists?(user_id: @user_id, question_id: @question_id)
-
-      if answer_exists
-        { message: "User has answered the question. Proceed to the next question." }
-      else
-        { error: "User must select an answer before proceeding." }
+      
+      test_progress = TestProgress.find_by!(user_id: user_id)
+      test_progress.increment!(:current_question_number)
+      next_question = Question.find_by(id: test_progress.current_question_number)
+      
+      if next_question.nil?
+        # Handle end of test logic here
       end
-    rescue => e
-      logger.error "QuestionNavigationService#validate_navigation: #{e.message}"
-      { error: "An error occurred while validating navigation." }
+      
+      { next_question_id: next_question&.id, current_question_number: test_progress.current_question_number, success: true }
     end
+  rescue ActiveRecord::RecordNotFound => e
+    { error: e.message, success: false }
+  rescue ActiveRecord::RecordInvalid => e
+    { error: e.message, success: false }
   end
 end
