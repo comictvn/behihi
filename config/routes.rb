@@ -4,5 +4,5 @@ Rails.application.routes.draw do
   mount Rswag::Api::Engine => '/api-docs'
   get '/health' => 'pages#health_check'
   get 'api-docs/v1/swagger.yaml' => 'swagger#yaml'
-  put '/test/progress/:userId', to: 'test_progress#update'
+  get '/test/questions/:questionId/feedback', to: 'feedback#show'
 end
