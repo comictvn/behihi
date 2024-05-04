@@ -1,7 +1,7 @@
 
 class Api::TestAnswersController < Api::BaseController
   before_action :doorkeeper_authorize!
-  include TestAnswerService
+  include TestAnswerHelper
 
   def record_answer
     user_id = params[:user_id].to_i
