@@ -7,13 +7,13 @@ class RetrieveQuestionAndOptions < BaseService
   end
 
   def call
-    question = Question.find(question_id)
+    question = Question.find_by!(id: question_id)
     options = question.options
-    illustration = question.illustration.attached? ? question.illustration : nil
+    illustration = question.illustration.attached? ? question.illustration.blob : nil
 
     {
       question_content: question.content,
-      options_list: options,
+      options_list: options.map { |option| { id: option.id, content: option.content } },
       illustration_file: illustration
     }
   rescue ActiveRecord::RecordNotFound => e
