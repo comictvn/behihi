@@ -3,9 +3,9 @@ module Api
   class QuestionsController < BaseController
     before_action :doorkeeper_authorize!, only: [:show_with_answers]
     before_action :doorkeeper_authorize!, only: [:show]
-
+    
     def show_with_answers
-      question = Question.find(params[:questionId])
+      question = Question.find(params[:id])
       options = question.options
 
       render json: {
@@ -16,7 +16,7 @@ module Api
           illustration: question.illustration.attached? ? url_for(question.illustration) : nil
         },
         options: options.map { |option| { id: option.id, content: option.content } }
-      }, status: :ok
+      }
     rescue ActiveRecord::RecordNotFound => e
       base_render_record_not_found(e)
     end
