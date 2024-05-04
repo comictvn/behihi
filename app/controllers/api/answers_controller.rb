@@ -1,6 +1,6 @@
 
 class Api::AnswersController < ApplicationController
-  before_action :doorkeeper_authorize!
+  before_action :doorkeeper_authorize!, only: [:record_answer]
   
   def record_answer
     user_id = params[:user_id].to_i
@@ -8,7 +8,7 @@ class Api::AnswersController < ApplicationController
     selected_option = params[:selected_option]
 
     # Validate input format
-    unless user_id.is_a?(Integer) && question_id.is_a?(Integer) && selected_option.is_a?(String)
+    unless user_id > 0 && question_id > 0 && selected_option.is_a?(String)
       render json: { error: 'Invalid input format.' }, status: :unprocessable_entity
       return
     end
@@ -17,16 +17,16 @@ class Api::AnswersController < ApplicationController
     unless User.exists?(id: user_id)
       render json: { error: 'User not found.' }, status: :not_found
       return
-    end
+    end unless Question.exists?(id: question_id)
 
-    unless Question.exists?(id: question_id)
+    unless Option.exists?(content: selected_option, question_id: question_id)
       render json: { error: 'Question not found.' }, status: :not_found
       return
     end
 
     # Use the service to record the answer
-    response = AnswerService::RecordUserAnswer.new(user_id, question_id, selected_option).execute
-    render json: response, status: :ok
+    response = AnswerService::RecordAnswer.new(user_id: user_id, question_id: question_id, selected_option: selected_option).execute
+    render json: { status: 200, message: 'Your answer has been recorded successfully.' }, status: :ok
   rescue StandardError => e
     render json: { error: e.message }, status: :unprocessable_entity
   end
