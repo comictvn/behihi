@@ -11,6 +11,7 @@ class Api::QuizzesController < ApplicationController
     selected_option_id = params[:selected_option_id].to_i
 
     # Validate input format
+    # Implementation will go here
     unless quiz_id.is_a?(Integer) && question_id.is_a?(Integer) && user_id.is_a?(Integer) && selected_option_id.is_a?(Integer)
       return render json: { message: "Invalid input format." }, status: :unprocessable_entity
     end
