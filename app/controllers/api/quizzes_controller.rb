@@ -1,6 +1,8 @@
 
 class Api::QuizzesController < ApplicationController
-  before_action :doorkeeper_authorize!
+  before_action :doorkeeper_authorize!, except: [:submit_answer]
+
+  # ... other actions ...
 
   def submit_answer
     quiz_id = params[:quizId].to_i
