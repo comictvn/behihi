@@ -1,5 +1,5 @@
 
-class TestProgressService
+class TestProgressService::UpdateProgress
   def self.update_progress(user_id, current_question_number)
     ActiveRecord::Base.transaction do
       user = User.find(user_id)
