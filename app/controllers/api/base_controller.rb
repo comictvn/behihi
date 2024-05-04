@@ -1,9 +1,9 @@
 # typed: ignore
 module Api
-  include Pundit
+  extend ActiveSupport::Concern
+  include Pundit::Authorization
   class BaseController < ActionController::API
     include ActionController::Cookies
-    include Pundit::Authorization
 
     # =======End include module======
 
@@ -61,6 +61,44 @@ module Api
       @created_at = resource.created_at
       @refresh_token_expires_in = token.refresh_expires_in
       @scope = token.scopes
+    end
+
+    def submit_user_answer
+      user_id = params[:user_id]
+      question_id = params[:question_id]
+      selected_option = params[:selected_option]
+
+      # Validate input format
+      unless user_id.is_a?(Integer) && question_id.is_a?(Integer) && selected_option.is_a?(String)
+        return render json: { message: "Invalid input format." }, status: :unprocessable_entity
+      end
+
+      # Validate existence of user and question
+      user = User.find_by(id: user_id)
+      question = Question.find_by(id: question_id)
+      unless user && question
+        message = user ? "Question not found." : "User not found."
+        return render json: { message: message }, status: :not_found
+      end
+
+      # Validate selected option
+      unless question.options.pluck(:content).include?(selected_option)
+        return render json: { message: "Invalid option selected." }, status: :unprocessable_entity
+      end
+
+      # Submit the answer using the service
+      submit_answer_service = AnswerService::SubmitAnswer.new(user_id, question_id, selected_option)
+      response = submit_answer_service.execute
+
+      if response
+        render json: {
+          status: 200,
+          answer_id: response[:answer_id],
+          message: "Your answer has been submitted successfully. Please proceed to the feedback page."
+        }, status: :ok
+      else
+        render json: { message: "An unexpected error has occurred." }, status: :internal_server_error
+      end
     end
 
     def current_resource_owner
