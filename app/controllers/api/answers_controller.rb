@@ -1,6 +1,6 @@
 
 class Api::AnswersController < ApplicationController
-  before_action :doorkeeper_authorize!
+  # before_action :doorkeeper_authorize!
   
   def record_answer
     user_id = params[:user_id].to_i
