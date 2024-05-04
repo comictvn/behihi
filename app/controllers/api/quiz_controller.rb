@@ -24,7 +24,7 @@ class Api::QuizController < Api::BaseController
 
     # Evaluate answer
     is_correct = option.is_correct
-    explanation = "Lorem Ipsum is simply dummy text of the printing and typesetting industry." # This should be replaced with the actual explanation from the database if available
+    explanation = option.explanation || "Lorem Ipsum is simply dummy text of the printing and typesetting industry." # Use actual explanation from the database if available
     feedback_message = is_correct ? "Correct answer!" : "Incorrect answer!"
 
     # Create answer record
