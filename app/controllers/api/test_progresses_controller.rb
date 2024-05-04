@@ -38,5 +38,7 @@ module Api
 
       render json: test_progress, status: :ok
     end
+
+    # Other controller actions...
   end
 end
