@@ -1,3 +1,4 @@
+
 # typed: ignore
 module Api
   include Pundit
@@ -21,6 +22,24 @@ module Api
         error_message: error.message,
         backtrace: error.backtrace
       }
+    end
+
+    def validate_answer
+      user_id = params[:user_id]
+      question_id = params[:question_id]
+
+      begin
+        result = NavigationService.new.check_unanswered_question(user_id, question_id)
+        if result[:error]
+          render json: { message: result[:error] }, status: :forbidden
+        else
+          render json: { status: 200, message: "Answer validated. You can proceed to the next question." }, status: :ok
+        end
+      rescue ActiveRecord::RecordNotFound => e
+        render json: { message: e.message }, status: :not_found
+      rescue => e
+        render json: { message: e.message }, status: :internal_server_error
+      end
     end
 
     private
