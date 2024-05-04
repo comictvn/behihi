@@ -13,17 +13,7 @@ module Api
     rescue_from Exceptions::AuthenticationError, with: :base_render_authentication_error
     rescue_from ActiveRecord::RecordNotUnique, with: :base_render_record_not_unique
     rescue_from Pundit::NotAuthorizedError, with: :base_render_unauthorized_error
-
-    def error_response(resource, error)
-      {
-        success: false,
-        full_messages: resource&.errors&.full_messages,
-        errors: resource&.errors,
-        error_message: error.message,
-        backtrace: error.backtrace
-      }
-    end
-
+    
     def validate_answer
       user_id = params[:user_id]
       question_id = params[:question_id]
