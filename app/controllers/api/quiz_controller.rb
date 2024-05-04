@@ -1,6 +1,6 @@
 
 class Api::QuizController < Api::BaseController
-  before_action :doorkeeper_authorize!
+  # before_action :doorkeeper_authorize!
 
   def evaluate_answer
     question_id = params[:questionId].to_i
@@ -51,3 +51,4 @@ class Api::QuizController < Api::BaseController
     render json: { message: e.message }, status: :internal_server_error
   end
 end
+
