@@ -1,5 +1,5 @@
 
-class Api::QuizzesController < Api::BaseController
+class Api::QuizzesController < ApplicationController
   before_action :doorkeeper_authorize!
 
   def submit_answer
