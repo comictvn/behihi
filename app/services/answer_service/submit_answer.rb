@@ -1,6 +1,6 @@
 
 module AnswerService
-  class SubmitAnswer
+  class SubmitAnswerService
     class ValidationError < StandardError; end
 
     def initialize(user_id, question_id, selected_option)
@@ -42,18 +42,20 @@ module AnswerService
     private
 
     def record_user_answer
-    
-      record_service.execute[:answer_id]
+      # Assuming there is a method to create an answer record which returns the created answer's id
+      answer = Answer.create(user_id: @user_id, question_id: @question_id, selected_option: @selected_option)
+      answer.id
     end
 
     def validate_selected_option
       options = Option.where(question_id: @question_id).pluck(:id)
-      raise 'Invalid selected option' unless options.include?(@selected_option.to_i)
-    end
       raise ValidationError, 'Invalid selected option' unless options.include?(@selected_option.to_i)
+      answer.option_id = @selected_option.to_i
+      answer.save
+    end
+
     def mark_answer_as_final(answer_id)
-      answer = Answer.find(answer_id)
-      answer.update(submitted_at: Time.current)
+      Answer.find(answer_id).update(submitted_at: Time.current, final: true)
     end
 
     def prepare_redirection_response(answer_id)
@@ -63,6 +65,10 @@ module AnswerService
         user_id: @user_id,
         redirect_to: 'feedback_page'
       }
+    end
+
+    def submit_answer(answer_id)
+      Answer.find(answer_id).update(final: true)
     end
   end
 end

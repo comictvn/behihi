@@ -7,7 +7,12 @@ module AnswerService
     end
 
     def execute
-      Option.exists?(question_id: @question_id, content: @selected_option)
+      option = Option.find_by(question_id: @question_id, content: @selected_option)
+      if option
+        return option
+      else
+        return nil
+      end
     end
   end
 end

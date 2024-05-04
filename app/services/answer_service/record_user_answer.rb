@@ -1,5 +1,6 @@
 
 module AnswerService
+  # This class is responsible for recording user answers.
   class RecordUserAnswer
     attr_reader :user_id, :question_id, :selected_option
 
@@ -17,9 +18,9 @@ module AnswerService
       validate_selected_option!
       answer = create_answer_record
       mark_answer_as_final(answer)
-      { status: 200, message: 'Your answer has been recorded successfully.' }
+      { status: 200, message: 'Your answer has been recorded successfully.', answer_id: answer.id }
     end
-
+    
     private
 
     def validate_user_and_question!
@@ -30,14 +31,15 @@ module AnswerService
     def validate_selected_option!
       unless Option.exists?(content: selected_option, question_id: question_id)
         raise StandardError, 'Invalid selected option for the given question.'
-      end
+      end # Ensures the selected option is valid for the question.
     end
 
     def create_answer_record
       Answer.create!(
         user_id: user_id,
         question_id: question_id,
-        selected_option: selected_option
+        selected_option: selected_option,
+        option_id: Option.find_by(content: selected_option, question_id: question_id).id # Links the answer to the selected option.
       )
     end
 
@@ -45,4 +47,4 @@ module AnswerService
       answer.update!(submitted_at: Time.current)
     end
   end
-end
+end # End of RecordUserAnswer class.
