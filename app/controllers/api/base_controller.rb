@@ -6,6 +6,10 @@ module Api
     include Pundit::Authorization
 
     # =======End include module======
+    rescue_from Exceptions::UserNotFoundError, with: :render_user_not_found
+    rescue_from Exceptions::QuestionNotFoundError, with: :render_question_not_found
+
+    # =======End rescue_from statements======
 
     rescue_from ActiveRecord::RecordNotFound, with: :base_render_record_not_found
     rescue_from ActiveRecord::RecordInvalid, with: :base_render_unprocessable_entity
@@ -44,6 +48,18 @@ module Api
     def base_render_record_not_unique
       render json: { message: I18n.t('common.errors.record_not_uniq_error') }, status: :forbidden
     end
+
+    def render_user_not_found
+      render json: { message: "User not found." }, status: :not_found
+    end
+
+    def render_question_not_found
+      render json: { message: "Question not found." }, status: :not_found
+    end
+
+    # =======End custom error render methods======
+
+    # Other private methods...
 
     def custom_token_initialize_values(resource, client)
       token = CustomAccessToken.create(
