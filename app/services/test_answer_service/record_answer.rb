@@ -1,25 +1,32 @@
 
 class TestAnswerService
-  def self.record_answer(user_id:, question_id:, selected_option_id:)
+  def self.record_answer(user_id:, question_id:, selected_option:)
     ActiveRecord::Base.transaction do
-      user = User.find(user_id)
-      question = Question.find(question_id)
-      option_exists = Option.where(question_id: question_id, id: selected_option_id).exists?
+      raise ArgumentError, "Invalid input format." unless user_id.is_a?(Integer) && question_id.is_a?(Integer)
+      raise ArgumentError, "Invalid input format." unless selected_option.is_a?(String)
 
-      raise ActiveRecord::RecordNotFound unless option_exists
+      user = User.find_by(id: user_id)
+      raise ActiveRecord::RecordNotFound, "User not found." unless user
+
+      question = Question.find_by(id: question_id)
+      raise ActiveRecord::RecordNotFound, "Question not found." unless question
+
+      option = Option.find_by(question_id: question_id, content: selected_option)
+      raise ActiveRecord::RecordNotFound, "Invalid option selected." unless option
 
       answer = Answer.find_or_initialize_by(user_id: user_id, question_id: question_id)
-      answer.selected_option_id = selected_option_id
+      answer.selected_option = selected_option
       answer.submitted_at = Time.current
+      answer.option_id = option.id
 
-      is_correct = Option.find(selected_option_id).is_correct
+      is_correct = option.is_correct
       answer.is_correct = is_correct
 
       answer.save!
 
       { success: true, answer_recorded: answer, is_correct: is_correct }
     end
-  rescue ActiveRecord::RecordNotFound => e
+  rescue ActiveRecord::RecordNotFound, ArgumentError => e
     { success: false, error: e.message }
   end
 end
