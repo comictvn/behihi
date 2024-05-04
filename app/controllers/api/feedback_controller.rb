@@ -2,20 +2,20 @@
 module Api
   class FeedbackController < BaseController
     before_action :doorkeeper_authorize!
+    before_action :load_question_and_user, only: [:show]
+
+    # Load question and user from the database
+    def load_question_and_user
+      @question = Question.find_by(id: params[:questionId])
+      @user = User.find_by(id: params[:userId])
+
+      render json: { error: "Question not found." }, status: :not_found unless @question
+      render json: { error: "User not found." }, status: :not_found unless @user
+    end
 
     def show
-      question_id = params[:questionId]
-      user_id = params[:userId]
-
-      # Validate presence of questionId and userId
-      question = Question.find_by(id: question_id)
-      user = User.find_by(id: user_id)
-
-      # Return 404 if question or user not found
-      return base_render_record_not_found(nil) unless question && user
-
       # Find the answer record associated with the userId and questionId
-      answer = Answer.find_by(user_id: user_id, question_id: question_id)
+      answer = Answer.find_by(user_id: @user.id, question_id: @question.id)
 
       # Return the feedback response
       if answer
