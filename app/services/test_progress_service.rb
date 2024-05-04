@@ -3,7 +3,7 @@
 module App
   module Services
     class TestProgressService < BaseService
-      def update_progress(user_id, question_id)
+      def update_progress(user_id, question_id) # method implementation
         ActiveRecord::Base.transaction do
           user = User.find(user_id)
           question = Question.find(question_id)
