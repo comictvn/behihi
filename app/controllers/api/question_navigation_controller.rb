@@ -27,7 +27,7 @@ class Api::QuestionNavigationController < Api::BaseController
     if service_response[:success]
       progress_response = TestProgressService.update_progress(
         user_id: current_resource_owner.id,
-        service_response[:current_question_number]
+        current_question_number: service_response[:current_question_number]
       )
       render json: progress_response.merge(
         status: 200,
