@@ -2,7 +2,9 @@ require 'sidekiq/web'
 Rails.application.routes.draw do
   mount Rswag::Ui::Engine => '/api-docs'
   mount Rswag::Api::Engine => '/api-docs'
+  namespace :api do
+    get '/test/questions/:questionId/next', to: 'question_navigation#next_question'
+  end
   get '/health' => 'pages#health_check'
   get 'api-docs/v1/swagger.yaml' => 'swagger#yaml'
-  get '/test/questions/:questionId/next', to: 'api/question_navigation#next_question'
 end

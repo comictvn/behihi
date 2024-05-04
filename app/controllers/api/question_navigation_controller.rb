@@ -1,6 +1,6 @@
 
 class Api::QuestionNavigationController < Api::BaseController
-  before_action :doorkeeper_authorize!
+  before_action :doorkeeper_authorize!, only: [:next_question]
 
   def next_question
     question_id = params[:questionId].to_i
@@ -9,7 +9,7 @@ class Api::QuestionNavigationController < Api::BaseController
     unless question_id.is_a?(Integer) && Question.exists?(question_id)
       render json: { error: "Question not found." }, status: :not_found
       return
-    end
+    end unless question_id.is_a?(Integer)
 
     # Ensure the user has selected an answer for the current question
     unless Answer.exists?(question_id: question_id, user: current_resource_owner)
@@ -17,7 +17,7 @@ class Api::QuestionNavigationController < Api::BaseController
       return
     end
 
-    # Call the service to navigate to the next question
+    # Call the service to navigate to the next question and save the user's answer
     service_response = QuestionNavigationService.new.navigate_next_question(
       user_id: current_resource_owner.id,
       question_id: question_id,
@@ -26,7 +26,7 @@ class Api::QuestionNavigationController < Api::BaseController
 
     if service_response[:success]
       progress_response = TestProgressService.update_progress(
-        current_resource_owner.id,
+        user_id: current_resource_owner.id,
         service_response[:current_question_number]
       )
       render json: progress_response.merge(
@@ -34,7 +34,7 @@ class Api::QuestionNavigationController < Api::BaseController
         next_question_id: service_response[:next_question_id],
         message: "You have successfully navigated to the next question."
       ), status: :ok
-    else
+    else # Handle errors when saving the answer or navigating to the next question
       render json: { error: service_response[:error] }, status: :unprocessable_entity
     end
   rescue ActiveRecord::RecordNotFound => e
