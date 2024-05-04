@@ -14,6 +14,7 @@ module Api
     rescue_from ActiveRecord::RecordNotUnique, with: :base_render_record_not_unique
     rescue_from Pundit::NotAuthorizedError, with: :base_render_unauthorized_error
     
+    # Validate the answer for a given question and user
     def validate_answer
       user_id = params[:user_id]
       question_id = params[:question_id]
