@@ -3,34 +3,37 @@ class Api::TestProgressController < Api::BaseController
   before_action :doorkeeper_authorize!
 
   def update
-    authenticate_and_validate_test_progress_update
+    user_id = params[:user_id].to_i
+    question_id = params[:question_id].to_i
 
-    test_progress = TestProgressService.new(params[:user_id], params[:question_id]).update_progress
+    return render json: { message: "Invalid input format." }, status: :unprocessable_entity unless user_id.is_a?(Integer) && question_id.is_a?(Integer)
 
-    render json: {
-      status: 200,
-      message: "Test progress updated successfully.",
-      current_question_number: test_progress.current_question_number
-    }, status: :ok
-  end
-
-  private
-
-  def authenticate_and_validate_test_progress_update
-    unless params[:user_id].is_a?(Integer) && params[:question_id].is_a?(Integer)
-      render json: { message: "Invalid input format." }, status: :unprocessable_entity and return
+    begin
+      user = User.find(user_id)
+    rescue ActiveRecord::RecordNotFound
+      return render json: { message: "User not found." }, status: :not_found
     end
 
     begin
-      User.find(params[:user_id])
+      question = Question.find(question_id)
     rescue ActiveRecord::RecordNotFound
-      render json: { message: "User not found." }, status: :not_found and return
+      return render json: { message: "Question not found." }, status: :not_found
+    end
+
+    policy = TestAnswerPolicy.new(current_resource_owner, nil)
+    unless policy.create?
+      return render json: { message: "Unauthorized" }, status: :forbidden
     end
 
     begin
-      Question.find(params[:question_id])
-    rescue ActiveRecord::RecordNotFound
-      render json: { message: "Question not found." }, status: :not_found and return
+      test_progress = TestProgressService.new(user_id, question_id).update_progress
+      render json: {
+        status: 200,
+        message: "Test progress updated successfully.",
+        current_question_number: test_progress[:current_question_number]
+      }, status: :ok
+    rescue StandardError => e
+      render json: { message: e.message }, status: :unprocessable_entity
     end
   end
 end
