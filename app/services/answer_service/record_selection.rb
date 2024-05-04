@@ -1,28 +1,28 @@
 
 class AnswerService::RecordSelection
-  def execute(user_id, question_id, selected_option_id)
+  def execute(user_id, question_id, selected_option_content)
     ActiveRecord::Base.transaction do
       user = User.find_by(id: user_id)
-      raise 'User does not exist' unless user
+      raise 'User not found.' unless user
 
       question = Question.find_by(id: question_id)
-      raise 'Question does not exist' unless question
+      raise 'Question not found.' unless question
 
-      selected_option = question.options.find_by(id: selected_option_id)
-      raise 'Selected option does not exist' unless selected_option
+      selected_option = question.options.find_by(content: selected_option_content)
+      raise 'Invalid option selected.' unless selected_option
 
-      answer = Answer.find_by(user_id: user_id, question_id: question_id)
+      answer = Answer.find_or_initialize_by(user_id: user_id, question_id: question_id)
+      answer.selected_option = selected_option.content
+      answer.submitted_at = Time.current
+      answer.is_correct = selected_option.is_correct
+      answer.save!
 
-      if answer
-        answer.update!(selected_option_id: selected_option_id, submitted_at: Time.current, is_correct: selected_option.is_correct)
-      else
-        answer = Answer.create!(user_id: user_id, question_id: question_id, selected_option_id: selected_option_id, submitted_at: Time.current, is_correct: selected_option.is_correct)
-      end
+      { status: 200, message: 'Your answer has been recorded successfully.' }
     end
-
-    { message: 'Answer recorded or updated successfully', is_correct: selected_option.is_correct }
+  rescue ActiveRecord::RecordInvalid => e
+    { status: 422, message: e.record.errors.full_messages.join(', ') }
   rescue => e
-    { message: e.message, is_correct: false }
+    { status: 400, message: e.message }
   ensure
     ActiveRecord::Base.connection.close if ActiveRecord::Base.connection.open_transactions.zero?
   end
