@@ -1,6 +1,6 @@
 
 class Api::QuizzesController < ApplicationController
-  before_action :doorkeeper_authorize!, except: [:submit_answer]
+  before_action :doorkeeper_authorize!
 
   # ... other actions ...
 
