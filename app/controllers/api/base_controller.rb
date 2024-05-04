@@ -1,10 +1,9 @@
 # typed: ignore
 module Api
-  include ActionController::Parameters
-  include Pundit
+  extend ActiveSupport::Concern
+  include Pundit::Authorization
   class BaseController < ActionController::API
     include ActionController::Cookies
-    include Pundit::Authorization
 
     # =======End include module======
 
