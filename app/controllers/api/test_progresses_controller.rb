@@ -28,5 +28,15 @@ module Api
         render json: { message: test_progress.errors.full_messages }, status: :unprocessable_entity
       end
     end
+
+    def show
+      user_id = params[:userId].to_i
+      return render json: { error: "Invalid user ID format." }, status: :bad_request unless user_id > 0
+
+      test_progress = TestProgress.find_by(user_id: user_id)
+      return render json: { error: "Test progress not found." }, status: :not_found unless test_progress
+
+      render json: test_progress, status: :ok
+    end
   end
 end
