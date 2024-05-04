@@ -1,6 +1,6 @@
 
 module AnswerService
-  class SubmitAnswerService
+  class SubmitAnswer
     class ValidationError < StandardError; end
 
     def initialize(user_id, question_id, selected_option)
