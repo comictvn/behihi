@@ -1,6 +1,6 @@
 
 class Api::QuestionNavigationController < Api::BaseController
-  before_action :doorkeeper_authorize!, only: [:next_question]
+  before_action :doorkeeper_authorize!, only: [:navigate_question]
 
   def next_question
     question_id = params[:questionId].to_i
@@ -9,7 +9,7 @@ class Api::QuestionNavigationController < Api::BaseController
     unless question_id.is_a?(Integer) && Question.exists?(question_id)
       render json: { error: "Question not found." }, status: :not_found
       return
-    end unless question_id.is_a?(Integer)
+    end
 
     # Ensure the user has selected an answer for the current question
     unless Answer.exists?(question_id: question_id, user: current_resource_owner)
