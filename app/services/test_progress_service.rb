@@ -23,4 +23,18 @@ class TestProgressService < BaseService
     logger.error "Error retrieving test progress: #{e.message}"
     raise
   end
+
+  def update_progress(user_id, question_id)
+    raise ArgumentError, "Invalid input format." unless user_id.is_a?(Integer) && question_id.is_a?(Integer)
+    raise ActiveRecord::RecordNotFound, "User not found." unless User.exists?(user_id)
+    raise ActiveRecord::RecordNotFound, "Question not found." unless Question.exists?(question_id)
+
+    test_progress = TestProgress.find_or_create_by(user_id: user_id)
+    test_progress.update!(current_question_number: question_id)
+
+    { status: 200, message: "Test progress updated successfully." }
+  rescue ActiveRecord::RecordInvalid => e
+    logger.error "Error updating test progress: #{e.message}"
+    raise
+  end
 end
