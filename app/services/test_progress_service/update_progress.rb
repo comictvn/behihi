@@ -10,7 +10,7 @@ class TestProgressService::UpdateProgress
   def call
     user = User.find(@user_id)
     test_progress = TestProgress.find_by!(user_id: user.id)
-    total_questions = Question.count
+    total_questions = test_progress.total_questions
 
     validate_current_question_number!
 
@@ -18,7 +18,7 @@ class TestProgressService::UpdateProgress
       test_progress.update!(current_question_number: @current_question_number)
     end
 
-    { status: 200, current_question_number: test_progress.current_question_number, total_questions: total_questions }
+    { status: 200, current_question_number: test_progress.current_question_number + 1, total_questions: total_questions }
   rescue ActiveRecord::RecordNotFound => e
     logger.error "User or TestProgress not found: #{e.message}"
     raise
