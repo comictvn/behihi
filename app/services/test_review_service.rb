@@ -7,15 +7,15 @@ class TestReviewService
 
   def compile_test_review(user_id)
     @user_service.validate_user_exists(user_id)
-    answers = @answer_service.retrieve_user_answers(user_id: user_id, submitted: true)
+    answers = @answer_service.retrieve_user_answers(user_id: user_id)
     
     answers.map do |answer|
-      question = answer.question
-      option = answer.option
       {
-        question_content: question.content,
-        selected_option_content: option.content,
-        is_correct: answer.is_correct
+        question_id: answer.question_id,
+        content: answer.question.content,
+        selected_option: answer.option.content,
+        is_correct: answer.is_correct,
+        submitted_at: answer.submitted_at.iso8601
       }
     end
   end
