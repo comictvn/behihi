@@ -45,6 +45,24 @@ module Api
       render json: { message: I18n.t('common.errors.record_not_uniq_error') }, status: :forbidden
     end
 
+    def validate_user(user_id)
+      user = User.find_by(id: user_id)
+      raise ActiveRecord::RecordNotFound, "User not found." unless user
+      user
+    end
+
+    def validate_question(question_id)
+      question = Question.find_by(id: question_id)
+      raise ActiveRecord::RecordNotFound, "Question not found." unless question
+      question
+    end
+
+    def validate_option(question_id, option_id)
+      option = Option.find_by(question_id: question_id, id: option_id)
+      raise ActiveRecord::RecordNotFound, "Invalid option selected." unless option
+      option
+    end
+
     def custom_token_initialize_values(resource, client)
       token = CustomAccessToken.create(
         application_id: client.id,
