@@ -45,7 +45,7 @@ module Api
       render json: { message: I18n.t('common.errors.record_not_uniq_error') }, status: :forbidden
     end
 
-    # Method added as per patch
+    # Method added to log user search query
     def log_user_search_query
       doorkeeper_authorize!
 
