@@ -1,6 +1,6 @@
 
 class RecordAnswer
-  attr_reader :user_id, :question_id, :option_id
+  attr_reader :user_id, :question_id, :option_id, :is_correct
 
   def initialize(user_id, question_id, option_id)
     @user_id = user_id
@@ -8,7 +8,7 @@ class RecordAnswer
     @option_id = option_id
   end
 
-  def execute
+  def call
     user = User.find_by(id: user_id)
     return { status: 404, message: I18n.t('user.not_found'), is_correct: false } unless user
 
@@ -25,7 +25,7 @@ class RecordAnswer
     test_progress.current_question_number = (test_progress.current_question_number || 0) + 1
     test_progress.save!
 
-    if test_progress.current_question_number == test_progress.total_questions
+    if test_progress.total_questions && test_progress.current_question_number == test_progress.total_questions
       # Calculate and record the user's test result
       correct_answers_count = Answer.where(user_id: user_id, is_correct: true).count
       # Record the result (implementation depends on the project's requirements)
@@ -33,7 +33,7 @@ class RecordAnswer
 
     { status: 200, message: I18n.t('answer.recorded_successfully'), is_correct: is_correct }
   rescue ActiveRecord::RecordInvalid => e
-    { status: 422, message: e.record.errors.full_messages.to_sentence, is_correct: false }
+    { status: 422, message: e.record.errors.full_messages.to_sentence, is_correct: nil }
   rescue StandardError => e
     { status: 500, message: I18n.t('errors.internal_server_error'), is_correct: false }
   end

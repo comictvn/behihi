@@ -1,5 +1,6 @@
 # typed: ignore
 module Api
+  include OauthTokensConcern
   include Pundit
   class BaseController < ActionController::API
     include ActionController::Cookies
@@ -8,6 +9,7 @@ module Api
     # =======End include module======
 
     rescue_from ActiveRecord::RecordNotFound, with: :base_render_record_not_found
+    before_action :doorkeeper_authorize!
     rescue_from ActiveRecord::RecordInvalid, with: :base_render_unprocessable_entity
     rescue_from Exceptions::AuthenticationError, with: :base_render_authentication_error
     rescue_from ActiveRecord::RecordNotUnique, with: :base_render_record_not_unique
