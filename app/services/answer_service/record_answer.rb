@@ -1,4 +1,5 @@
 
+module AnswerService
 class RecordAnswer
   attr_reader :user_id, :question_id, :option_id, :is_correct
 
@@ -37,4 +38,6 @@ class RecordAnswer
   rescue StandardError => e
     { status: 500, message: I18n.t('errors.internal_server_error'), is_correct: false }
   end
+end
+
 end
