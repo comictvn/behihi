@@ -1,9 +1,13 @@
+
 # typed: ignore
+require_dependency 'oauth_tokens_concern'
+
 module Api
   include Pundit
   class BaseController < ActionController::API
     include ActionController::Cookies
     include Pundit::Authorization
+    include OauthTokensConcern
 
     # =======End include module======
 

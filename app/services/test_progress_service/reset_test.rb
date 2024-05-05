@@ -10,6 +10,7 @@ module TestProgressService
     def execute
       ActiveRecord::Base.transaction do
         user = User.find_by(id: user_id)
+        total_questions = Question.count
         raise 'User not found' unless user
 
         test_progress = user.test_progresses.last
@@ -21,9 +22,9 @@ module TestProgressService
             score: 0.0
           )
         else
-          test_progress = user.test_progresses.create!(
+          user.test_progresses.create!(
             current_question_number: 1,
-            total_questions: 0, # Assuming total_questions is required but not provided in the requirement
+            total_questions: total_questions,
             score: 0.0
           )
         end
