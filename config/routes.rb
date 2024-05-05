@@ -6,6 +6,6 @@ Rails.application.routes.draw do
   get 'api-docs/v1/swagger.yaml' => 'swagger#yaml'
 
   namespace :api do
-    post '/test-questions/:id/selection', to: 'selections#create'
+    post '/selections', to: 'selections#create'
   end
 end
