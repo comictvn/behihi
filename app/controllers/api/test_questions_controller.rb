@@ -1,6 +1,6 @@
 
 class Api::TestQuestionsController < ApplicationController
-  before_action :validate_id_format, only: [:show]
+  before_action :validate_id_format, only: [:show, :options]
 
   # GET /test-questions/:id
   def show
@@ -28,10 +28,19 @@ class Api::TestQuestionsController < ApplicationController
     end
   end
 
+  # GET /test-questions/:questionId/options
+  def options
+    question = Question.find_by(id: params[:questionId])
+    return render json: { error: "Question not found." }, status: :not_found unless question
+
+    render json: { status: 200, options: question.options.select(:id, :content) }, status: :ok
+  end
+
   private
 
   def validate_id_format
-    unless params[:id].to_s.match?(/\A[0-9]+\z/)
+    id_param = params[:id] || params[:questionId]
+    unless id_param.to_s.match?(/\A[0-9]+\z/)
       render json: { error: "Invalid question ID format." }, status: :bad_request
     end
   end
