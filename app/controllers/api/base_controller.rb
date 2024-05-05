@@ -1,11 +1,11 @@
+
 # typed: ignore
 module Api
   include Pundit
+  include FaqSearchService  # Included as per patch
   class BaseController < ActionController::API
     include ActionController::Cookies
     include Pundit::Authorization
-
-    # =======End include module======
 
     rescue_from ActiveRecord::RecordNotFound, with: :base_render_record_not_found
     rescue_from ActiveRecord::RecordInvalid, with: :base_render_unprocessable_entity
@@ -43,6 +43,30 @@ module Api
 
     def base_render_record_not_unique
       render json: { message: I18n.t('common.errors.record_not_uniq_error') }, status: :forbidden
+    end
+
+    # Method added to log user search query
+    def log_user_search_query
+      doorkeeper_authorize!
+
+      user_id = params[:user_id]
+      search_query = params[:search_query]
+
+      result = LogSearchQuery.log_search_query(user_id, search_query)
+
+      if result[:error]
+        case result[:error]
+        when 'User not found', 'Search query cannot be empty', 'Invalid search query'
+          render json: { message: result[:error] }, status: :bad_request
+        else
+          render json: { message: result[:error] }, status: :unprocessable_entity
+        end
+      else
+        render json: {
+          status: 201,
+          log: result.slice(:id, :search_query, :user_id)
+        }, status: :created
+      end
     end
 
     def custom_token_initialize_values(resource, client)
