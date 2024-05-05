@@ -1,6 +1,6 @@
 
 class Api::SelectionsController < Api::BaseController
-  before_action :doorkeeper_authorize!
+  # before_action :doorkeeper_authorize!
 
   def create
     question_id = params[:id]
