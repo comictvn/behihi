@@ -7,5 +7,5 @@ Rails.application.routes.draw do
   get 'api-docs/v1/swagger.yaml' => 'swagger#yaml'
   # ... other routes ...
 
-  post '/test-answers/', to: 'answers#create'
+  post '/api/answers', to: 'api/answers#create'
 end
