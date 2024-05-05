@@ -2,7 +2,8 @@ class FaqInteraction < ApplicationRecord
   belongs_to :user
   belongs_to :question
 
-  enum interaction_type: %w[viewed searched know_clicked view search answer click], _suffix: true
+  enum interaction_type: %w[viewed searched know_clicked view search answer click comment like dislike feedback],
+       _suffix: true
 
   # validations
 

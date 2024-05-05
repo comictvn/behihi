@@ -1,7 +1,7 @@
-class TestProgress < ApplicationRecord
-  has_many :answers, dependent: :destroy
-
+class Achievement < ApplicationRecord
   belongs_to :user
+
+  has_many_attached :badge, dependent: :destroy
 
   # validations
 
