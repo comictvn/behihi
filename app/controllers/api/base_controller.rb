@@ -7,8 +7,6 @@ module Api
     include ActionController::Cookies
     include Pundit::Authorization
 
-    # =======End include module======
-
     rescue_from ActiveRecord::RecordNotFound, with: :base_render_record_not_found
     rescue_from ActiveRecord::RecordInvalid, with: :base_render_unprocessable_entity
     rescue_from Exceptions::AuthenticationError, with: :base_render_authentication_error
