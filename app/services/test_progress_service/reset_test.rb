@@ -8,10 +8,13 @@ module TestProgressService
     end
 
     def execute
+      user_service = UserService.new
+
       ActiveRecord::Base.transaction do
-        user = User.find_by(id: user_id)
+        raise ActiveRecord::RecordNotFound unless user_service.validate_user_exists(user_id)
+
+        user = User.find(user_id)
         total_questions = Question.count
-        raise 'User not found' unless user
 
         test_progress = user.test_progresses.last
 
@@ -23,8 +26,8 @@ module TestProgressService
           )
         else
           user.test_progresses.create!(
-            current_question_number: 1,
             total_questions: total_questions,
+            current_question_number: 1,
             score: 0.0
           )
         end
@@ -34,5 +37,12 @@ module TestProgressService
 
       'Test has been reset and can be retaken'
     end
+  end
+end
+
+# Assuming UserService is defined elsewhere in the application and has the following method:
+class UserService
+  def validate_user_exists(user_id)
+    User.exists?(user_id)
   end
 end
