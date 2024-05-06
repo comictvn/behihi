@@ -19,12 +19,15 @@ module UserService
 
     def record_exit_action(user)
       # Assuming there is a model called UserAction that records user actions
-      # UserAction.create(user: user, action_type: 'exit_test_completion')
+      UserAction.create(user: user, action_type: 'exit_test_completion')
       # Placeholder for analytics or user behavior tracking
     end
 
     def perform_cleanup_operations
-      # Placeholder for cleanup operations such as resetting test state or clearing temporary data
+      # Implement cleanup operations here
+      # For example, if there's a need to reset the user's test progress:
+      TestProgress.where(user_id: @user_id).delete_all
+      # Add any other cleanup logic needed
     end
   end
 end
