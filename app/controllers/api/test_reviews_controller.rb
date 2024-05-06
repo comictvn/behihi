@@ -3,12 +3,14 @@ class Api::TestReviewsController < Api::BaseController
   before_action :doorkeeper_authorize!
 
   def show
-    user_id = params[:userId].to_i
-    return render json: { message: "Invalid user ID format." }, status: :bad_request unless user_id.is_a?(Integer) && user_id.to_s == params[:userId]
+    user_id = params[:userId]
+    unless user_id =~ /\A\d+\z/
+      return render json: { message: "Invalid user ID format." }, status: :bad_request
+    end
 
-    begin
-      @user_service.validate_user_exists(user_id)
-    rescue ActiveRecord::RecordNotFound
+    user_id = user_id.to_i
+    user = User.find_by(id: user_id)
+    unless user
       return render json: { message: "User not found." }, status: :not_found
     end
 
