@@ -5,20 +5,18 @@ class UserService
   end
 
   def retrieve_test_review(user_id)
-    if validate_user_exists(user_id)
-      answers = Answer.includes(:question, :option)
-                      .where(user_id: user_id, submitted_at: !nil)
-                      .order('questions.created_at ASC')
+    return [] unless validate_user_exists(user_id)
 
-      answers.map do |answer|
-        {
-          question_content: answer.question.content,
-          selected_option_content: answer.option.content,
-          is_correct: answer.is_correct
-        }
-      end
-    else
-      []
+    answers = Answer.includes(:question, :option)
+                    .where(user_id: user_id, submitted_at: !nil)
+                    .order('questions.created_at ASC')
+
+    answers.map do |answer|
+      {
+        question_content: answer.question.content,
+        selected_option_content: answer.option.content,
+        is_correct: answer.is_correct
+      }
     end
   end
 end
