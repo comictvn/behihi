@@ -12,6 +12,7 @@ module TestResultService
     def call
       ActiveRecord::Base.transaction do
         user = User.find_by(id: user_id)
+        validate_badge_level! if badge_level
         raise ActiveRecord::RecordNotFound, "User not found" unless user
 
         validate_score!
@@ -36,6 +37,13 @@ module TestResultService
     def validate_score!
       raise ArgumentError, "Score must be an integer" unless score.is_a?(Integer)
       raise ArgumentError, "Score must be between 0 and 100" unless score.between?(0, 100)
+    end
+
+    def validate_badge_level!
+      valid_badge_levels = ['bronze', 'silver', 'gold']
+      unless valid_badge_levels.include?(badge_level.downcase)
+        raise ArgumentError, "Invalid badge level."
+      end
     end
 
     def determine_badge_level

@@ -1,6 +1,5 @@
 
 require 'sidekiq/web'
-
 Rails.application.routes.draw do
   mount Rswag::Ui::Engine => '/api-docs'
   mount Rswag::Api::Engine => '/api-docs'
@@ -8,7 +7,5 @@ Rails.application.routes.draw do
   get 'api-docs/v1/swagger.yaml' => 'swagger#yaml'
   # ... other routes ...
 
-  namespace :api, defaults: { format: :json } do
-    post '/share-achievement', to: 'achievements#share'
-  end
+  post '/test-completion' => 'users#record_test_completion'
 end
