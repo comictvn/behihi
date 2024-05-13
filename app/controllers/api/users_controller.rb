@@ -1,7 +1,6 @@
 
 class Api::UsersController < ApplicationController
-  before_action :authenticate_user!, except: [:record_test_completion]
-  before_action :doorkeeper_authorize!, only: [:exit_test_completion, :record_test_completion, :exit]
+  before_action :doorkeeper_authorize!, only: [:exit_test_completion, :record_test_completion]
 
   # Other actions ...
 
@@ -21,16 +20,12 @@ class Api::UsersController < ApplicationController
     render json: { status: 500, message: e.message }, status: :internal_server_error
   end
 
-  # POST /api/users/exit
-  def exit
-    result = UserService::ExitTestCompletion.new(params.require(:user_id)).call
-    if result[:error].present?
-      render json: { message: result[:error] }, status: :unprocessable_entity
-    else
-      render json: { message: result[:message] }, status: :ok
-    end
-  rescue ActionController::ParameterMissing => e
-    render json: { message: e.message }, status: :bad_request
+  rescue_from ActiveRecord::RecordNotFound do |e|
+    render json: { status: 404, message: e.message }, status: :not_found
+  end
+
+  rescue_from ArgumentError do |e|
+    render json: { status: 400, message: e.message }, status: :bad_request
   end
 
   # POST /test-completion
@@ -43,7 +38,7 @@ class Api::UsersController < ApplicationController
       user_id: user_id,
       score: score,
       badge_level: badge_level
-    ).execute
+    ).call
 
     if result[:message]
       render json: result, status: :ok
@@ -53,8 +48,4 @@ class Api::UsersController < ApplicationController
   rescue ActiveRecord::RecordNotFound, ArgumentError => e
     render json: { status: 400, message: e.message }, status: :bad_request
   end
-
-  private
-
-  # Other private methods ...
 end
