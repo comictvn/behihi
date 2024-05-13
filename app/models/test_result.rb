@@ -7,6 +7,20 @@ class TestResult < ApplicationRecord
 
   before_save :assign_badge_level, if: -> { badge_level.blank? }
 
+  # Record the user's action of exiting the test completion screen
+  def self.record_exit(user_id)
+    user = User.find_by(id: user_id)
+    raise ActiveRecord::RecordNotFound, "User not found" unless user
+
+    # Placeholder for analytics or user behavior tracking
+    # Analytics.record('test_completion_exit', user_id: user_id)
+
+    # Placeholder for cleanup operations
+    # Cleanup.perform(user_id: user_id)
+
+    { message: 'User has exited the test completion screen and can be redirected.' }
+  end
+
   private
 
   def assign_badge_level

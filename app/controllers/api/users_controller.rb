@@ -1,6 +1,6 @@
 
 class Api::UsersController < ApplicationController
-  before_action :authenticate_user!, except: [:exit_test_completion]
+  before_action :authenticate_user!, except: [:exit_test_completion, :record_test_completion]
   before_action :doorkeeper_authorize!, only: [:record_test_completion]
 
   # Other actions ...
@@ -9,6 +9,7 @@ class Api::UsersController < ApplicationController
   def exit_test_completion
     user_id = params.require(:user_id)
     result = UserService::ExitTestCompletion.new(user_id).execute
+    # Ensure the UserService::ExitTestCompletion service is implemented as per the requirement
     render json: { status: 200, message: result[:message] }, status: :ok
   rescue ActionController::ParameterMissing => e
     render json: { status: 400, message: e.message }, status: :bad_request
