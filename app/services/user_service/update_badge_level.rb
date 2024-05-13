@@ -20,6 +20,12 @@ module UserService
       end
     end
 
+    def create_test_result
+      TestResult.create!(user_id: @user_id, score: @score, badge_level: @badge_level)
+    rescue ActiveRecord::RecordInvalid => e
+      raise ArgumentError, e.record.errors.full_messages.join(', ')
+    end
+
     def call
       raise ArgumentError, 'Invalid user_id' unless User.exists?(@user_id)
       raise ArgumentError, 'Invalid score' unless @score.is_a?(Integer) && (0..100).include?(@score)
@@ -28,6 +34,7 @@ module UserService
       User.transaction do
         user = User.find(@user_id)
         user.update!(badge_level: @badge_level)
+        create_test_result
       end
       { success: true, message: 'Badge level updated successfully' }
     rescue ActiveRecord::RecordNotFound => e
