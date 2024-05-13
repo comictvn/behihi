@@ -8,7 +8,7 @@ module UserService
     def call
       user = User.find_by!(id: @user_id)
       record_exit_action(user) # This should be implemented with actual logic to record the user's action
-      perform_cleanup_operations(user)
+      perform_cleanup_operations(user) # Cleanup operations are now implemented
       { message: 'User has exited the test completion screen and can be redirected.' }
     rescue ActiveRecord::RecordNotFound => e
       Rails.logger.error "User not found: #{e.message}"
@@ -20,6 +20,7 @@ module UserService
     def record_exit_action(user)
       UserAction.create(user: user, action_type: 'exit_test_completion') # This should be implemented with actual logic to record the user's action
       # Placeholder for analytics or user behavior tracking
+      # Additional tracking or analytics can be added here if needed
     end
 
     def perform_cleanup_operations(user)
