@@ -5,7 +5,7 @@ class Api::TestReviewsController < Api::BaseController
 
   def show
     user_id = params[:userId]
-    if user_id.to_s !~ /\A\d+\z/
+    if user_id.to_s !~ /\A[0-9]+\z/
       render json: { message: "Invalid user ID format." }, status: :bad_request and return
     end
 
@@ -19,7 +19,11 @@ class Api::TestReviewsController < Api::BaseController
     unless user == current_resource_owner
       render json: { message: "Unauthorized" }, status: :unauthorized and return
     end
+    
+    # Check if the user is authorized to access the test review
+    authorize user, policy_class: Api::TestReviewsPolicy
 
+    # Retrieve the test review data
     test_review_service = TestReviewService.new
     test_review_data = test_review_service.compile_test_review(user_id)
 

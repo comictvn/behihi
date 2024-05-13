@@ -10,7 +10,7 @@ class TestReviewService
     user = @user_service.validate_user_exists(user_id)
     raise StandardError.new("User not found.") unless user
 
-    # Retrieve user answers and format them
+    # Retrieve user answers and format them for review
     answers = @answer_service.retrieve_user_answers(user_id: user_id)
     raise StandardError.new("User's test progress or answers do not exist.") if answers.empty?
 
@@ -20,7 +20,7 @@ class TestReviewService
         question_id: answer.question_id,
         content: answer.question.content,
         selected_option: answer.option.content,
-        is_correct: answer.is_correct?,
+        is_correct: answer.is_correct,
         submitted_at: answer.submitted_at.iso8601
       }
     end
