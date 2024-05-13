@@ -11,11 +11,7 @@ class Api::AchievementsController < Api::BaseController
     begin
       shareable_content = AchievementService.share_achievement(user_id, test_result_id)
 
-      render json: {
-        status: :ok,
-        shareable_link: shareable_content[:link],
-        message: shareable_content[:message]
-      }, status: :ok
+      render 'api/achievements/share', locals: { shareable_link: shareable_content[:link], message: shareable_content[:message] }, status: :ok
     rescue AchievementService::ShareAchievementError => e
       render json: { message: e.message }, status: :not_found
     rescue ActionController::ParameterMissing => e

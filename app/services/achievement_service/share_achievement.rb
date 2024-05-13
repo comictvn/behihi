@@ -2,21 +2,16 @@
 class AchievementService
   class ShareAchievementError < StandardError; end
 
-  def self.generate_shareable_content(user_id, test_result_id)
+  def self.share_achievement(user_id, test_result_id)
     user = User.find_by(id: user_id)
     raise ShareAchievementError, 'User not found' unless user
 
-    test_progress = user.test_progresses.find_by(id: test_result_id)
-    raise ShareAchievementError, 'Test result not found' unless test_progress
+    test_result = user.test_progresses.find_by(id: test_result_id)
+    raise ShareAchievementError, 'Test result not found' unless test_result
 
-    shareable_link = generate_link_for(test_progress)
+    message = "Congratulations #{user.username}! You have achieved a #{test_result.badge_level} badge with a score of #{test_result.score}. Share your achievement: #{generate_link_for(test_result)}"
 
-    {
-      link: shareable_link,
-      message: "Share your achievement with your friends!"
-    }
-  rescue ActiveRecord::RecordNotFound => e
-    raise ShareAchievementError, e.message
+    { link: generate_link_for(test_result), message: message }
   end
 
   def self.generate_link_for(test_progress)
