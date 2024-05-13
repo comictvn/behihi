@@ -5,10 +5,11 @@ class UserService
   end
 
   def retrieve_test_review(user_id)
-    return 'User does not exist' unless validate_user_exists(user_id)
+    return { error: 'User does not exist' } unless validate_user_exists(user_id)
 
     answers = Answer.includes(:question, :option)
-                    .where(user_id: user_id, submitted_at: !nil)
+                    .where(user_id: user_id)
+                    .where.not(submitted_at: nil)
                     .order('questions.created_at ASC')
 
     answers.map do |answer|
