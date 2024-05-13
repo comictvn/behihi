@@ -1,11 +1,11 @@
 
 class Api::TestRetakesController < Api::BaseController
   before_action :doorkeeper_authorize!, only: [:create]
-  before_action :validate_user_id, only: [:create]
+  before_action :validate_user_id_and_authorization, only: [:create]
 
   # POST /api/test_retakes
   def create
-    user_id = params[:userId].to_i
+    user_id = current_resource_owner.id
 
     begin
       message = TestProgressService::ResetTest.new(user_id).execute
@@ -20,12 +20,20 @@ class Api::TestRetakesController < Api::BaseController
   private
 
   def validate_user_id
-    unless params[:userId].to_s.match?(/\A\d+\z/)
+    user_id = params[:userId].to_i
+    unless user_id.to_s.match?(/\A\d+\z/)
       render json: { message: "Invalid user ID format." }, status: :bad_request and return
     end
 
-    unless User.exists?(params[:userId].to_i)
+    unless User.exists?(user_id)
       render json: { message: "User not found." }, status: :not_found and return
+    end
+  end
+
+  def validate_user_id_and_authorization
+    validate_user_id
+    unless Api::TestReviewsPolicy.new(current_resource_owner, params[:userId]).retrieve?
+      render json: { message: "Unauthorized" }, status: :unauthorized and return
     end
   end
 
