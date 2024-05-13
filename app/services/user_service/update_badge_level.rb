@@ -1,18 +1,38 @@
 
 module UserService
   class UpdateBadgeLevel
-    def initialize(user_id, badge_level)
+    BADGE_LEVELS = ['Bronze', 'Silver', 'Gold', 'Platinum'].freeze
+
+    def initialize(user_id, score, badge_level = nil)
       @user_id = user_id
-      @badge_level = badge_level
+      @score = score
+      @badge_level = badge_level || determine_badge_level(score)
+    end
+
+    def determine_badge_level(score)
+      case score
+      when 0..59 then 'Bronze'
+      when 60..79 then 'Silver'
+      when 80..89 then 'Gold'
+      when 90..100 then 'Platinum'
+      else
+        raise ArgumentError, 'Invalid score'
+      end
     end
 
     def call
+      raise ArgumentError, 'Invalid user_id' unless User.exists?(@user_id)
+      raise ArgumentError, 'Invalid score' unless @score.is_a?(Integer) && (0..100).include?(@score)
+      raise ArgumentError, 'Invalid badge_level' unless BADGE_LEVELS.include?(@badge_level)
+
       User.transaction do
         user = User.find(@user_id)
         user.update!(badge_level: @badge_level)
       end
       { success: true, message: 'Badge level updated successfully' }
     rescue ActiveRecord::RecordNotFound => e
+      { success: false, message: e.message }
+    rescue ArgumentError => e
       { success: false, message: e.message }
     rescue ActiveRecord::RecordInvalid => e
       { success: false, message: e.record.errors.full_messages.join(', ') }

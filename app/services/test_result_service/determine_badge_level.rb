@@ -17,7 +17,17 @@ module TestResultService
 
     def call
       # Find the badge level that matches the score range
-      BADGE_LEVELS.find { |_level, range| range.include?(score) }&.first
+      badge_level = BADGE_LEVELS.find { |_level, range| range.include?(score) }&.first
+      badge_level || determine_custom_badge_level
+    end
+
+    private
+
+    # Define a method to determine custom badge levels for future extensions
+    def determine_custom_badge_level
+      # Placeholder for custom logic to determine new badge levels
+      # This method can be overridden or extended in the future without changing the existing code structure
+      nil
     end
   end
 end
