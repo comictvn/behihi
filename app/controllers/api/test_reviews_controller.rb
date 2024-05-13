@@ -5,19 +5,19 @@ class Api::TestReviewsController < Api::BaseController
 
   def show
     user_id = params[:userId]
-    unless user_id =~ /\A\d+\z/
-      return render json: { message: "Invalid user ID format." }, status: :bad_request
+    if user_id.to_s !~ /\A\d+\z/
+      render json: { message: "Invalid user ID format." }, status: :bad_request and return
     end
 
     user_id = user_id.to_i
     user = User.find_by(id: user_id)
     unless user
-      return render json: { message: "User not found." }, status: :not_found
+      render json: { message: "User not found." }, status: :not_found and return
     end
 
     # Ensure the authenticated user is the one requesting their test review
     unless user == current_resource_owner
-      return render json: { message: "Unauthorized" }, status: :unauthorized
+      render json: { message: "Unauthorized" }, status: :unauthorized and return
     end
 
     test_review_service = TestReviewService.new
