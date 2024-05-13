@@ -11,7 +11,7 @@ module TestProgressService
       user_service = UserService.new
 
       ActiveRecord::Base.transaction do
-        raise ActiveRecord::RecordNotFound.new("User not found") unless user_service.validate_user_exists(user_id)
+        raise ActiveRecord::RecordNotFound, "User not found" unless user_service.validate_user_exists(user_id)
 
         user = User.find(user_id)
         total_questions = Question.count
@@ -32,7 +32,7 @@ module TestProgressService
           )
         end
 
-        Answer.where(user_id: user_id).destroy_all
+        user.answers.destroy_all
       end
 
       'Test has been reset and can be retaken'
