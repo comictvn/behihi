@@ -1,6 +1,6 @@
 
 class Api::TestRetakesController < Api::BaseController
-  before_action :doorkeeper_authorize!
+  before_action :doorkeeper_authorize!, only: [:create]
   before_action :validate_user_id, only: [:create]
 
   # POST /api/test_retakes
@@ -24,7 +24,7 @@ class Api::TestRetakesController < Api::BaseController
       render json: { message: "Invalid user ID format." }, status: :bad_request and return
     end
 
-    unless User.exists?(params[:userId])
+    unless User.exists?(params[:userId].to_i)
       render json: { message: "User not found." }, status: :not_found and return
     end
   end
