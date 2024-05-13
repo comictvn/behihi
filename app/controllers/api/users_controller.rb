@@ -1,6 +1,6 @@
 
 class Api::UsersController < ApplicationController
-  before_action :authenticate_user!
+  before_action :authenticate_user!, except: [:exit_test_completion]
 
   # Other actions ...
 

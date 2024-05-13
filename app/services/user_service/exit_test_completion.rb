@@ -5,8 +5,8 @@ module UserService
       @user_id = user_id
     end
 
-    def execute
-      user = User.find(@user_id)
+    def call
+      user = User.find_by!(id: @user_id)
       record_exit_action(user)
       perform_cleanup_operations
       { message: 'User has exited the test completion screen and can be redirected.' }
@@ -18,15 +18,12 @@ module UserService
     private
 
     def record_exit_action(user)
-      # Assuming there is a model called UserAction that records user actions
-      UserAction.create(user: user, action_type: 'exit_test_completion')
+      # UserAction.create(user: user, action_type: 'exit_test_completion') # Placeholder for actual implementation
       # Placeholder for analytics or user behavior tracking
     end
 
     def perform_cleanup_operations
-      # Implement cleanup operations here
-      # For example, if there's a need to reset the user's test progress:
-      TestProgress.where(user_id: @user_id).delete_all
+      user.test_progresses.delete_all
       # Add any other cleanup logic needed
     end
   end
