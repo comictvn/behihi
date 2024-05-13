@@ -1,6 +1,6 @@
 
 class Api::UsersController < ApplicationController
-  before_action :authenticate_user!, except: [:exit_test_completion, :record_test_completion]
+  before_action :authenticate_user!, except: [:record_test_completion]
   before_action :doorkeeper_authorize!, only: [:exit_test_completion, :record_test_completion]
 
   # Other actions ...
@@ -8,6 +8,7 @@ class Api::UsersController < ApplicationController
   # POST /api/users/exit_test_completion
   def exit_test_completion
     doorkeeper_authorize!
+    # Ensure that the user_id parameter is present and corresponds to an existing user
     user_id = params.require(:user_id)
     user = User.find(user_id)
     result = UserService::ExitTestCompletion.new(user_id).call
@@ -15,7 +16,7 @@ class Api::UsersController < ApplicationController
   rescue ActionController::ParameterMissing => e
     render json: { status: 400, message: e.message }, status: :bad_request
   rescue ActiveRecord::RecordNotFound
-    render json: { status: 404, message: 'User not found.' }, status: :not_found
+    render json: { status: 404, message: 'User not found or invalid user_id.' }, status: :not_found
   rescue StandardError => e
     render json: { status: 500, message: e.message }, status: :internal_server_error
   end

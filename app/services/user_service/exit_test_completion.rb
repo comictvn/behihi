@@ -6,21 +6,26 @@ module UserService
     end
 
     def call
-      user = User.find_by!(id: @user_id)
-      record_exit_action(user) # This should be implemented with actual logic to record the user's action
-      perform_cleanup_operations(user) # Cleanup operations are now implemented
+      return { error: 'User does not exist.' } unless User.exists?(@user_id)
+
+      user = User.find(@user_id)
+      record_exit_action(user)
+      perform_cleanup_operations(user)
       { message: 'User has exited the test completion screen and can be redirected.' }
     rescue ActiveRecord::RecordNotFound => e
       Rails.logger.error "User not found: #{e.message}"
-      raise
+      { error: 'User not found.' }
+    rescue StandardError => e
+      Rails.logger.error "An error occurred: #{e.message}"
+      { error: 'An unexpected error occurred.' }
     end
 
     private
 
     def record_exit_action(user)
-      UserAction.create(user: user, action_type: 'exit_test_completion') # This should be implemented with actual logic to record the user's action
       # Placeholder for analytics or user behavior tracking
-      # Additional tracking or analytics can be added here if needed
+      # Actual implementation would depend on the analytics tool being used
+      # Example: AnalyticsService.record('exit_test_completion', user_id: user.id)
     end
 
     def perform_cleanup_operations(user)
