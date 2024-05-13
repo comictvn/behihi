@@ -27,16 +27,16 @@ module UserService
     end
 
     def call
-      raise ArgumentError, 'Invalid user_id' unless User.exists?(@user_id)
+      user = User.find_by(id: @user_id)
+      raise ArgumentError, 'Invalid user_id' if user.nil?
       raise ArgumentError, 'Invalid score' unless @score.is_a?(Integer) && (0..100).include?(@score)
       raise ArgumentError, 'Invalid badge_level' unless BADGE_LEVELS.include?(@badge_level)
 
       User.transaction do
-        user = User.find(@user_id)
         user.update!(badge_level: @badge_level)
         create_test_result
       end
-      { success: true, message: 'Badge level updated successfully' }
+      { success: true, message: 'Test completed and score recorded', badge_level: @badge_level }
     rescue ActiveRecord::RecordNotFound => e
       { success: false, message: e.message }
     rescue ArgumentError => e

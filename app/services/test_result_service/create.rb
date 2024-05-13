@@ -12,10 +12,11 @@ module TestResultService
     def call
       ActiveRecord::Base.transaction do
         user = User.find_by(id: user_id)
-        validate_badge_level! if badge_level
         raise ActiveRecord::RecordNotFound, "User not found" unless user
 
         validate_score!
+        validate_badge_level! if badge_level
+
         @badge_level ||= DetermineBadgeLevel.new(score).call
 
         test_result = TestResult.create!(
