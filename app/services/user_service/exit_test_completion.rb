@@ -6,12 +6,12 @@ module UserService
     end
 
     def call
-      return { error: 'User does not exist.' } unless User.exists?(@user_id)
+      return { error: 'User not found.' } unless User.exists?(@user_id)
 
       user = User.find(@user_id)
       record_exit_action(user)
       perform_cleanup_operations(user)
-      { message: 'User has exited the test completion screen and can be redirected.' }
+      { status: 200, message: 'You have exited the test completion screen.' }
     rescue ActiveRecord::RecordNotFound => e
       Rails.logger.error "User not found: #{e.message}"
       { error: 'User not found.' }
