@@ -17,21 +17,6 @@ class Api::TestRetakesController < Api::BaseController
     end
   end
 
-  def retake
-    user_id = params[:userId].to_i
-
-    begin
-      # Use the ResetTest service to reset the test progress
-      message = TestProgressService::ResetTest.new(user_id).execute
-      render json: { status: 200, message: message }, status: :ok
-    rescue ActiveRecord::RecordNotFound => e
-      render json: { message: e.message }, status: :not_found
-    rescue StandardError => e
-      # Handle any exceptions and respond with appropriate error messages and status codes
-      render json: { message: e.message }, status: :internal_server_error
-    end
-  end
-
   private
 
   def validate_user_id
