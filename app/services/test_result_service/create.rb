@@ -1,6 +1,6 @@
 
 module TestResultService
-  class CreateTestResult
+  class Create
     attr_reader :user_id, :score, :badge_level
 
     def initialize(user_id:, score:, badge_level: nil)
@@ -8,7 +8,7 @@ module TestResultService
       @score = score
       @badge_level = badge_level
     end
-    
+
     def call
       ActiveRecord::Base.transaction do
         user = User.find_by(id: user_id)
@@ -16,7 +16,7 @@ module TestResultService
         raise ActiveRecord::RecordNotFound, "User not found" unless user
 
         validate_score!
-        @badge_level ||= TestResultService::DetermineBadgeLevel.call(score: score)
+        @badge_level ||= DetermineBadgeLevel.new(score).call
 
         test_result = TestResult.create!(
           user_id: user_id,
@@ -24,7 +24,7 @@ module TestResultService
           badge_level: @badge_level
         )
 
-        update_user_profile(user, @badge_level)
+        update_user_profile(user, test_result.badge_level)
 
         { message: "Test completion and score recorded successfully.", badge_level: @badge_level }
       end
@@ -40,7 +40,7 @@ module TestResultService
     end
 
     def validate_badge_level!
-      unless TestResult::BADGE_LEVELS.include?(badge_level.to_s.downcase)
+      unless DetermineBadgeLevel::BADGE_LEVELS.keys.include?(badge_level.to_s.downcase)
         raise ArgumentError, "Invalid badge level."
       end
     end
@@ -48,6 +48,6 @@ module TestResultService
     def update_user_profile(user, badge_level)
       # Assuming there is a method in the User model to update the badge level
       user.update_badge_level(badge_level) if badge_level
-    end 
+    end
   end
 end
