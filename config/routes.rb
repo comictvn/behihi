@@ -1,17 +1,8 @@
-
 require 'sidekiq/web'
-
 Rails.application.routes.draw do
   mount Rswag::Ui::Engine => '/api-docs'
   mount Rswag::Api::Engine => '/api-docs'
   get '/health' => 'pages#health_check'
   get 'api-docs/v1/swagger.yaml' => 'swagger#yaml'
-  post '/test-completion' => 'users#record_test_completion'
-
-  # Define a namespace for API
-  namespace :api do
-    resources :achievements, only: [] do
-      post 'share', on: :collection
-    end
-  end
+  post '/share-achievement' => 'api/achievements#share'
 end
