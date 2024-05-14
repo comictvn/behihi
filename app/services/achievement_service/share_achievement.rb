@@ -1,5 +1,5 @@
 
-class AchievementService < BaseService
+module AchievementService
   class ShareAchievementError < StandardError; end
 
   def self.generate_shareable_link(user_id, test_result_id)
