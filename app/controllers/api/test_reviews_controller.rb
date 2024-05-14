@@ -1,29 +1,25 @@
-
 class Api::TestReviewsController < Api::BaseController
   include OauthTokensConcern
   before_action :doorkeeper_authorize!
 
   def show
-    user_id = params[:userId]
-    if user_id.to_s !~ /\A[0-9]+\z/
+    begin
+      user_id = Integer(params[:userId])
+    rescue ArgumentError
       render json: { message: "Invalid user ID format." }, status: :bad_request and return
     end
 
-    user_id = user_id.to_i
     user = User.find_by(id: user_id)
     unless user
       render json: { message: "User not found." }, status: :not_found and return
     end
 
-    # Ensure the authenticated user is the one requesting their test review
     unless user == current_resource_owner
       render json: { message: "Unauthorized" }, status: :unauthorized and return
     end
-    
-    # Check if the user is authorized to access the test review
+
     authorize user, policy_class: Api::TestReviewsPolicy
 
-    # Retrieve the test review data
     test_review_service = TestReviewService.new
     test_review_data = test_review_service.compile_test_review(user_id)
 
