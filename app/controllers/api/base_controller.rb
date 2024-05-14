@@ -1,9 +1,12 @@
+
 # typed: ignore
+
 module Api
   include Pundit
   class BaseController < ActionController::API
     include ActionController::Cookies
     include Pundit::Authorization
+    include OauthTokensConcern
 
     # =======End include module======
 
