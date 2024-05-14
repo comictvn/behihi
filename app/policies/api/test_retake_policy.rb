@@ -1,4 +1,3 @@
-
 class Api::TestRetakePolicy < ApplicationPolicy
   def initialize(user, record)
     @user = user
