@@ -1,4 +1,5 @@
 
+require_dependency 'achievement_service/share_achievement'
 class Api::AchievementsController < Api::BaseController
   before_action :doorkeeper_authorize!
   rescue_from AchievementService::ShareAchievementError, with: :achievement_not_found
