@@ -1,6 +1,5 @@
 
 # typed: ignore
-require_dependency 'oauth_tokens_concern'
 
 module Api
   include Pundit
