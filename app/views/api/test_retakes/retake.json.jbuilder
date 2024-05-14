@@ -1,3 +1,5 @@
+json.status 200
+json.message UserService.new.initiate_test_retake(user_id)
 
 # app/views/api/test_retakes/retake.json.jbuilder
 
