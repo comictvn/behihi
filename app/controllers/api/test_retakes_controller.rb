@@ -7,6 +7,7 @@ class Api::TestRetakesController < Api::BaseController
     user_id = params[:userId].to_i
 
     begin
+      # Ensure the user_id is valid and the user is authorized to create a test retake
       message = TestProgressService::ResetTest.new(user_id).execute
       render json: { status: 200, message: message }, status: :ok
     rescue ActiveRecord::RecordNotFound => e
