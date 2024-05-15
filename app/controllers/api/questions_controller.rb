@@ -1,21 +1,15 @@
-class Api::QuestionsController < Api::BaseController
-  before_action :doorkeeper_authorize!
+module Api
+  class QuestionsController < BaseController
+    before_action :doorkeeper_authorize!, only: [:additional_info]
 
-  def tips
-    question = Question.find_by(id: params[:questionId])
-    if question
-      tips = question.options.where(is_correct: true).pluck(:content)
+    def additional_info
+      question = Question.find_by(id: params[:questionId])
+      return base_render_record_not_found unless question
+
       render json: {
         status: 200,
-        question: {
-          id: question.id,
-          content: question.content,
-          illustration: question.illustration.attached? ? url_for(question.illustration) : nil,
-          tips: tips
-        }
+        additional_info: "Lorem Ipsum is simply dummy text of the printing and typesetting industry."
       }, status: :ok
-    else
-      base_render_record_not_found
     end
   end
 end

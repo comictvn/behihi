@@ -1,5 +1,5 @@
 class QuestionPolicy < ApplicationPolicy
-  def tips?
+  def additional_info?
     user.present?
   end
 end
