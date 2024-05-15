@@ -1,5 +1,5 @@
 class Api::ReactionsController < Api::BaseController
-  before_action :doorkeeper_authorize!
+  # before_action :doorkeeper_authorize!
 
   def create
     user = User.find_by(id: reaction_params[:user_id])
