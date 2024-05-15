@@ -1,3 +1,4 @@
+module TopicService
 class RetrieveTopicDetailsService < BaseService
   def execute(topic_id)
     raise ArgumentError, 'topic_id must be an integer' unless topic_id.is_a?(Integer)
@@ -12,4 +13,6 @@ class RetrieveTopicDetailsService < BaseService
 
     { id: topic_with_detail.id, title: topic_with_detail.title, content: topic_with_detail.content }
   end
+end
+end
 end
