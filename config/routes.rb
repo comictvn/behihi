@@ -4,8 +4,5 @@ Rails.application.routes.draw do
   mount Rswag::Api::Engine => '/api-docs'
   get '/health' => 'pages#health_check'
   get 'api-docs/v1/swagger.yaml' => 'swagger#yaml'
-
-  namespace :api do
-    get '/topics/:id', to: 'topics#show', id: /\d+/
-  end
+  get '/topics/:topic_id/validate_access', to: 'api/topics#validate_access'
 end

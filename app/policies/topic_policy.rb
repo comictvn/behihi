@@ -1,5 +1,5 @@
 class TopicPolicy < ApplicationPolicy
-  def access?
+  def validate_access?
     record.user_id == user.id
   end
 end
