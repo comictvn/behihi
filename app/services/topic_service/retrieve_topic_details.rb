@@ -15,4 +15,3 @@ class RetrieveTopicDetailsService < BaseService
   end
 end
 end
-end
