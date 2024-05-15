@@ -5,6 +5,7 @@ class User < ApplicationRecord
   has_many :topics, dependent: :destroy
   has_many :test_progresses, dependent: :destroy
   has_many :achievements, dependent: :destroy
+  has_many :error_notifications, dependent: :destroy
 
   # validations
 
