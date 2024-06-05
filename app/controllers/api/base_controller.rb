@@ -1,6 +1,8 @@
+
 # typed: ignore
 module Api
   include Pundit
+  include OauthTokensConcern  # Included from patch
   class BaseController < ActionController::API
     include ActionController::Cookies
     include Pundit::Authorization
@@ -8,7 +10,7 @@ module Api
     # =======End include module======
 
     rescue_from ActiveRecord::RecordNotFound, with: :base_render_record_not_found
-    rescue_from ActiveRecord::RecordInvalid, with: :base_render_unprocessable_entity
+    rescue_from ActiveRecord::RecordInvalid, with: :base_render_unprocessable_entity  # Added from patch
     rescue_from Exceptions::AuthenticationError, with: :base_render_authentication_error
     rescue_from ActiveRecord::RecordNotUnique, with: :base_render_record_not_unique
     rescue_from Pundit::NotAuthorizedError, with: :base_render_unauthorized_error
@@ -16,7 +18,7 @@ module Api
     def error_response(resource, error)
       {
         success: false,
-        full_messages: resource&.errors&.full_messages,
+        full_messages: resource&.errors&.full_messages,  # Added from patch
         errors: resource&.errors,
         error_message: error.message,
         backtrace: error.backtrace
@@ -25,12 +27,26 @@ module Api
 
     private
 
+    before_action :doorkeeper_authorize!  # Added from patch
+
     def base_render_record_not_found(_exception)
       render json: { message: I18n.t('common.404') }, status: :not_found
     end
 
     def base_render_unprocessable_entity(exception)
       render json: { message: exception.record.errors.full_messages }, status: :unprocessable_entity
+    end
+
+    def authenticate_user  # Added from patch
+      user_id = params[:userId]
+      unless user_id.is_a?(Integer)
+        render json: { message: I18n.t('activerecord.errors.messages.not_an_integer') }, status: :bad_request
+        return
+      end
+
+      @user = User.find(user_id)
+    rescue ActiveRecord::RecordNotFound
+      render json: { message: I18n.t('common.404') }, status: :not_found
     end
 
     def base_render_authentication_error(_exception)
