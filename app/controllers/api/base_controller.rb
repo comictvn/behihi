@@ -1,3 +1,4 @@
+
 # typed: ignore
 module Api
   include Pundit
@@ -12,15 +13,24 @@ module Api
     rescue_from Exceptions::AuthenticationError, with: :base_render_authentication_error
     rescue_from ActiveRecord::RecordNotUnique, with: :base_render_record_not_unique
     rescue_from Pundit::NotAuthorizedError, with: :base_render_unauthorized_error
+    
+    # Validate the answer for a given question and user
+    def validate_answer
+      user_id = params[:user_id]
+      question_id = params[:question_id]
 
-    def error_response(resource, error)
-      {
-        success: false,
-        full_messages: resource&.errors&.full_messages,
-        errors: resource&.errors,
-        error_message: error.message,
-        backtrace: error.backtrace
-      }
+      begin
+        result = NavigationService.new.check_unanswered_question(user_id, question_id)
+        if result[:error]
+          render json: { message: result[:error] }, status: :forbidden
+        else
+          render json: { status: 200, message: "Answer validated. You can proceed to the next question." }, status: :ok
+        end
+      rescue ActiveRecord::RecordNotFound => e
+        render json: { message: e.message }, status: :not_found
+      rescue => e
+        render json: { message: e.message }, status: :internal_server_error
+      end
     end
 
     private
